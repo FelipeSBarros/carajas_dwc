@@ -2,3 +2,57 @@
 
 quit()
 cd Felipe/CARAJAS/Mestrado/
+
+--considerando o uso do Rgedit...
+sudo su
+--senha
+su postgres
+
+--creating de database
+createdb mestrado
+--entering the db
+psql mestrado
+
+
+--creating tables and column definitions:
+--flora_endemica
+DROP TABLE flora_endemica;
+
+CREATE TABLE flora_endemica(
+id_reg serial not null primary key,
+ num varchar(250),
+ dups varchar(250),
+ duplicata varchar(250),
+ familia varchar(250),
+ nome_cientifico varchar(250),
+ categoria_ameaca varchar(250),
+ gazetteer varchar(250),
+ ambiente_resumido varchar(250),
+ collector varchar(250),
+ number varchar(250),
+ Colldd varchar(250),
+ Collmm varchar(250),
+ Collyy varchar(250),
+ lat_gr varchar(250),
+ lat_min varchar(250),
+ lat_sec varchar(250),
+ lat varchar(250),
+ ns varchar(250),
+ long_gr varchar(250),
+ long_min varchar(250),
+ long_sec varchar(250),
+ long varchar(250),
+ ew varchar(250),
+ zona varchar(250),
+ lat_utm varchar(250),
+ long_utm varchar(250),
+datum varchar(250));
+----------------------
+--Copiando tabelas
+----------------------
+--Flora endemica
+COPY public.flora_endemica (num, dups, duplicata, familia, nome_cientifico, categoria_ameaca, gazetteer, ambiente_resumido, collector, number, Colldd, Collmm, Collyy, lat_gr, lat_min, lat_sec, lat, ns, long_gr, long_min, long_sec, long, ew, zona, lat_utm, long_utm,datum) FROM '/home/felipe/Felipe/CARAJAS/Mestrado/Flora/Tabelas/20141128-endemicas carajas_consolidacao_Final.csv' WITH CSV HEADER;
+
+--Inserindo coordenadas quando latitude e/ou longitude = 0
+update artigo_ma.species_link set longitude = longitude_mun  where longitude='0'
+update artigo_ma.species_link set latitude = latitude_mun  where latitude='0'
