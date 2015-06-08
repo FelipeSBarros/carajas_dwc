@@ -1,0 +1,34 @@
+--Script analysis
+--considerando o uso do Rgedit...
+
+quit()
+sudo su
+--senha
+su postgres
+
+psql mestrado
+
+----------------------------
+--Algumas análises de qualidade:
+----------------------------
+--Quantos registros possuim georreferencia utm?
+--FLORA
+select count(*) from flora.flora_endemica where lat_utm is not null and long_utm is not null;
+--544
+--Quantos registros possuiem georreferencia lat/long?
+select count(*) from flora.flora_endemica where lat is not null and long is not null;
+--695
+--ANFIBIOS
+select count(*) from fauna.anfibios where lat_utm is not null and long_utm is not null;
+--3632
+
+
+--Analise de distancia:
+--Adocionando nova coluna com SRC diferente SIRGAS2000
+ALTER TABLE flora.flora_endemica add geom_teste geometry(POINT, 31982);
+--adicionando as coordenadas à coluna de geometria SIRgas2000
+UPDATE flora.flora_endemica set geom_teste=ST_PointFromText('POINT('||long_utm|| ' ' || lat_utm || ')', 31982);
+
+--Qual a distancia media quando usamos datum diferentes?
+select avg(st_distance(geom_teste,st_transform(geom_sad,31982))) from flora.flora_endemica;
+--media de 60.6 metros entre os registros inseridos com datum correto ao registro com datum errado WGS85
