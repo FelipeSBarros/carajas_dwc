@@ -9,16 +9,18 @@ sudo su
 su postgres
 
 --creating de database
-createdb mestrado
+--createdb mestrado
 --entering the db
 psql mestrado
 
 
 --creating tables and column definitions:
+--Schema FLORA
+create schema flora
 --flora_endemica
-DROP TABLE flora_endemica;
+--DROP TABLE flora.flora_endemica;
 
-CREATE TABLE flora_endemica(
+CREATE TABLE flora.flora_endemica(
 id_reg serial not null primary key,
  num varchar(250),
  dups varchar(250),
@@ -49,7 +51,7 @@ id_reg serial not null primary key,
 datum varchar(250));
 ----------------------
 --TNRS flora_endemica
-CREATE TABLE tnrs_flora_endemica(
+CREATE TABLE flora.tnrs_flora_endemica(
 id_reg serial not null primary key,
 Name_submitted varchar(250),
 Name_matched varchar(250),
@@ -63,23 +65,309 @@ Source varchar(250),
 Warnings varchar(250),
 Accepted_name_lsid varchar(250));
 
+-------------------------
+--Leguminosas
+--DROP TABLE flora_fabaceas; 
+--!!!!!!!Restaurado do projeto !!!!!!!!
+CREATE TABLE flora_fabaceas(
+id_reg serial not null primary key,
+ observacoes varchar(250),
+ ihcode varchar(250),
+ num varchar(250),
+ family varchar(250),
+ subfamilia varchar(250),
+ species varchar(250),
+ genus varchar(250),
+ cf varchar(50),
+ sp1 varchar(250),
+ author1 varchar(250),
+ rank1 varchar(50),
+ sp2 varchar(250),
+ author2 varchar(250),
+ barcode varchar(250),
+ redlist varchar(50),
+ ameaca varchar(250),
+ categoria varchar(250),
+ mestrado varchar(250),
+ canga varchar(250),
+ habito varchar(250),
+ typestat varchar(250),
+ country varchar(250),
+ majorare varchar(250),
+ minorarea varchar(250),
+ gazetteer varchar(250),
+ geodata_c varchar(250),
+ habitat_c varchar(250),
+ lat varchar(250),
+ lon varchar(250),
+ alt varchar(250),
+ tipo_coord varchar(250),
+ notes varchar(250),
+ modulacao varchar(250),
+ bancodna varchar(250),
+ collector varchar(250),
+ number varchar(250),
+ addColl varchar(250),
+ Colldd varchar(250),
+ Collmm varchar(250),
+ Collyy varchar(250),
+ detby varchar(250),
+ detdd varchar(250),
+ detmm varchar(250),
+ detyy varchar(250),
+ vernacular varchar(250),
+ dups varchar(250),
+ colec_orig varchar(250));
+
 --Copiando tabelas
 ----------------------
 --Flora endemica
-COPY public.flora_endemica (num, dups, duplicata, familia, nome_cientifico, categoria_ameaca, gazetteer, ambiente_resumido, collector, number, Colldd, Collmm, Collyy, lat_gr, lat_min, lat_sec, lat, ns, long_gr, long_min, long_sec, long, ew, zona, lat_utm, long_utm,datum) FROM '/home/felipe/Felipe/CARAJAS/Mestrado/Flora/Tabelas/20141128-endemicas carajas_consolidacao_Final.csv' WITH CSV HEADER;
---Inserindo uma coluna para ter nome TNRS
-ALTER TABLE flora_endemica add tnrs_id integer;
---Inserindo coluna de geometria
-ALTER TABLE flora_endemica add geom_sad geometry(POINT, 29192);
---Adocionando nova coluna com SRC diferente SIRGAS2000
-ALTER TABLE flora_endemica add geom_sir geometry(POINT, 31982);
---adicionando as coordenadas à coluna de geometria SAD
-UPDATE flora_endemica set geom_sad=ST_PointFromText('POINT('||long_utm|| ' ' || lat_utm || ')', 29192);
---adicionando as coordenadas à coluna de geometria SIRgas2000
-UPDATE flora_endemica set geom_sir=ST_transform(geom_sad, 31982);
-
+COPY flora.flora_endemica (num, dups, duplicata, familia, nome_cientifico, categoria_ameaca, gazetteer, ambiente_resumido, collector, number, Colldd, Collmm, Collyy, lat_gr, lat_min, lat_sec, lat, ns, long_gr, long_min, long_sec, long, ew, zona, lat_utm, long_utm,datum) FROM '/home/felipe/Felipe/CARAJAS/Mestrado/Flora/Tabelas/20141128-endemicas carajas_consolidacao_Final.csv' WITH CSV HEADER;
 --TRNS Flora endemica
-COPY public.tnrs_flora_endemica (Name_submitted,Name_matched,Author_matched,Overall_score,Taxonomic_status,Accepted_name,Accepted_author,Accepted_family,Source,Warnings,Accepted_name_lsid) FROM '/home/felipe/Felipe/CARAJAS/Mestrado/Flora/Tabelas/tnrs_results_flora_endemica.csv' WITH CSV HEADER;
+COPY flora.tnrs_flora_endemica (Name_submitted,Name_matched,Author_matched,Overall_score,Taxonomic_status,Accepted_name,Accepted_author,Accepted_family,Source,Warnings,Accepted_name_lsid) FROM '/home/felipe/Felipe/CARAJAS/Mestrado/Flora/Tabelas/tnrs_results_flora_endemica.csv' WITH CSV HEADER;
 
+--Inserindo uma coluna para ter nome TNRS
+ALTER TABLE flora.flora_endemica add tnrs_id integer;
+--Inserindo coluna de geometria
+ALTER TABLE flora.flora_endemica add geom_sad geometry(POINT, 29192);
+--Adocionando nova coluna com SRC diferente SIRGAS2000
+ALTER TABLE flora.flora_endemica add geom_sir geometry(POINT, 31982);
+--adicionando as coordenadas à coluna de geometria SAD
+UPDATE flora.flora_endemica set geom_sad=ST_PointFromText('POINT('||long_utm|| ' ' || lat_utm || ')', 29192);
+--adicionando as coordenadas à coluna de geometria SIRgas2000
+UPDATE flora.flora_endemica set geom_sir=ST_transform(geom_sad, 31982);
 --Adicionando a chave extrangeira do resultado tnrs a tabela flora_endemica
-UPDATE flora_endemica a set tnrs_id=b.id_reg from tnrs_flora_endemica b where a.nome_cientifico=b.name_submitted ;
+UPDATE flora.flora_endemica a set tnrs_id=b.id_reg from flora.tnrs_flora_endemica b where a.nome_cientifico=b.name_submitted ;
+
+
+--------------------------
+--FAUNA
+--PROBLEMAS: Os dados com datum sir, estão com datum sad.a conversao nao deu certo......
+--------------------------
+create schema fauna;
+
+--Tabela ANFIBIOS
+--drop table fauna.anfibios;
+CREATE TABLE fauna.anfibios(
+id_reg serial not null primary key,
+ id integer,
+ classe varchar(250),
+ ordem varchar(250),
+ familia varchar(250),
+ data varchar(250),
+ especie_estudo varchar(250),
+ nome_cientifico varchar(250),
+ tipo_registro varchar(250),
+ projeto varchar(250),
+ long_utm varchar(250),
+ lat_utm varchar(250),
+ categoria_ameaca_iucn varchar(250),
+ categoria_ameaca_br varchar(250),
+ categoria_ameaca_pa varchar(250),
+ categoria_endemismo varchar(250),
+ categoria_endemismo_canga varchar(250),
+ classificacao_endemismo varchar(250),
+ importancia varchar(250));
+----------------------
+COPY fauna.anfibios (id,classe,ordem,familia,data,especie_estudo,nome_cientifico,
+tipo_registro,projeto,long_utm,lat_utm,categoria_ameaca_iucn,
+categoria_ameaca_br,categoria_ameaca_pa,categoria_endemismo,
+categoria_endemismo_canga,classificacao_endemismo,importancia) FROM '/home/felipe/Felipe/CARAJAS/Mestrado/Fauna/Tabelas/anfibios_14_12_2014.csv' WITH CSV HEADER;
+--Inserindo coluna de geometria
+ALTER TABLE fauna.anfibios add geom_sad geometry(POINT, 29192);
+--Adocionando nova coluna com SRC diferente SIRGAS2000
+ALTER TABLE fauna.anfibios add geom_sir geometry(POINT, 31982);
+--adicionando as coordenadas à coluna de geometria SAD
+UPDATE fauna.anfibios set geom_sad=ST_PointFromText('POINT('||long_utm|| ' ' || lat_utm || ')', 29192);
+--adicionando as coordenadas à coluna de geometria SIRgas2000
+UPDATE fauna.anfibios set geom_sir=ST_PointFromText('POINT('||long_utm|| ' ' || lat_utm || ')', 31982);
+
+--Tabela REPTEIS
+--drop table fauna.repteis;
+CREATE TABLE fauna.repteis(
+id_reg serial not null primary key,
+ id integer,
+ classe varchar(250),
+ ordem varchar(250),
+ familia varchar(250),
+ data varchar(250),
+ especie_estudo varchar(250),
+ nome_cientifico varchar(250),
+ referencia varchar(250),
+ tipo_registro varchar(250),
+ projeto varchar(250),
+ long_utm varchar(250),
+ lat_utm varchar(250),
+ categoria_ameaca_iucn varchar(250),
+ categoria_ameaca_br varchar(250),
+ categoria_ameaca_pa varchar(250),
+ categoria_endemismo varchar(250),
+ categoria_endemismo_canga varchar(250),
+ classificacao_endemismo varchar(250),
+ importancia varchar(250));
+----------------------
+COPY fauna.repteis (id,classe,ordem,familia,data,especie_estudo,nome_cientifico,
+referencia,tipo_registro,projeto,long_utm,lat_utm,categoria_ameaca_iucn,
+categoria_ameaca_br,categoria_ameaca_pa,categoria_endemismo,
+categoria_endemismo_canga,classificacao_endemismo,importancia) FROM '/home/felipe/Felipe/CARAJAS/Mestrado/Fauna/Tabelas/repteis_14_12_2014.csv' WITH CSV HEADER;
+--Inserindo coluna de geometria
+ALTER TABLE fauna.repteis add geom_sad geometry(POINT, 29192);
+--Adocionando nova coluna com SRC diferente SIRGAS2000
+ALTER TABLE fauna.repteis add geom_sir geometry(POINT, 31982);
+--adicionando as coordenadas à coluna de geometria SAD
+UPDATE fauna.repteis set geom_sad=ST_PointFromText('POINT('||long_utm|| ' ' || lat_utm || ')', 29192);
+--adicionando as coordenadas à coluna de geometria SIRgas2000
+UPDATE fauna.repteis set geom_sir=ST_PointFromText('POINT('||long_utm|| ' ' || lat_utm || ')', 31982);
+
+--Tabela peq_mamiferos
+--drop table fauna.peq_mamiferos;
+CREATE TABLE fauna.peq_mamiferos(
+id_reg serial not null primary key,
+ id integer,
+ classe varchar(250),
+ ordem varchar(250),
+ familia varchar(250),
+ data varchar(250),
+ especie_estudo varchar(250),
+ nome_cientifico varchar(250),
+ tipo_registro varchar(250),
+ projeto varchar(250),
+ long_utm varchar(250),
+ lat_utm varchar(250),
+ categoria_ameaca_iucn varchar(250),
+ categoria_ameaca_br varchar(250),
+ categoria_ameaca_pa varchar(250),
+ categoria_endemismo varchar(250),
+ categoria_endemismo_canga varchar(250),
+ classificacao_endemismo varchar(250),
+ importancia varchar(250));
+----------------------
+COPY fauna.peq_mamiferos (id,classe,ordem,familia,data,especie_estudo,nome_cientifico,tipo_registro,projeto,long_utm,lat_utm,categoria_ameaca_iucn,
+categoria_ameaca_br,categoria_ameaca_pa,categoria_endemismo,
+categoria_endemismo_canga,classificacao_endemismo,importancia) FROM '/home/felipe/Felipe/CARAJAS/Mestrado/Fauna/Tabelas/peq_mamiferos_14_12_2014.csv' WITH CSV HEADER;
+--Inserindo coluna de geometria
+ALTER TABLE fauna.peq_mamiferos add geom_sad geometry(POINT, 29192);
+--Adocionando nova coluna com SRC diferente SIRGAS2000
+ALTER TABLE fauna.peq_mamiferos add geom_sir geometry(POINT, 31982);
+--adicionando as coordenadas à coluna de geometria SAD
+UPDATE fauna.peq_mamiferos set geom_sad=ST_PointFromText('POINT('||long_utm|| ' ' || lat_utm || ')', 29192);
+--adicionando as coordenadas à coluna de geometria SIRgas2000
+UPDATE fauna.peq_mamiferos set geom_sir=ST_PointFromText('POINT('||long_utm|| ' ' || lat_utm || ')', 31982);
+
+--Tabela morcegos
+--drop table fauna.morcegos;
+CREATE TABLE fauna.morcegos(
+id_reg serial not null primary key,
+ id integer,
+ classe varchar(250),
+ ordem varchar(250),
+ familia varchar(250),
+ data varchar(250),
+ especie_estudo varchar(250),
+ nome_cientifico varchar(250),
+ tipo_registro varchar(250),
+ projeto varchar(250),
+ long_utm varchar(250),
+ lat_utm varchar(250),
+ categoria_ameaca_iucn varchar(250),
+ categoria_ameaca_br varchar(250),
+ categoria_ameaca_pa varchar(250),
+ categoria_endemismo varchar(250),
+ categoria_endemismo_canga varchar(250),
+ classificacao_endemismo varchar(250),
+ importancia varchar(250));
+----------------------
+COPY fauna.morcegos (id,classe,ordem,familia,data,especie_estudo,nome_cientifico,tipo_registro,projeto,long_utm,lat_utm,categoria_ameaca_iucn,
+categoria_ameaca_br,categoria_ameaca_pa,categoria_endemismo,
+categoria_endemismo_canga,classificacao_endemismo,importancia) FROM '/home/felipe/Felipe/CARAJAS/Mestrado/Fauna/Tabelas/morcegos_14_12_2014.csv' WITH CSV HEADER;
+--Inserindo coluna de geometria
+ALTER TABLE fauna.morcegos add geom_sad geometry(POINT, 29192);
+--Adocionando nova coluna com SRC diferente SIRGAS2000
+ALTER TABLE fauna.morcegos add geom_sir geometry(POINT);
+--adicionando as coordenadas à coluna de geometria SAD
+UPDATE fauna.morcegos set geom_sad=ST_PointFromText('POINT('||long_utm|| ' ' || lat_utm || ')', 29192);
+--adicionando as coordenadas à coluna de geometria SIRgas2000
+UPDATE fauna.morcegos set geom_sir=ST_PointFromText('POINT('||long_utm|| ' ' || lat_utm || ')', 31982);
+
+--Tabela mg_mamiferos
+--drop table fauna.mg_mamiferos;
+--truncate table fauna.mg_mamiferos;
+CREATE TABLE fauna.mg_mamiferos(
+id_reg serial not null primary key,
+ id integer,
+ classe varchar(250),
+ ordem varchar(250),
+ familia varchar(250),
+ data varchar(250),
+ especie_estudo varchar(250),
+ nome_cientifico varchar(250),
+ tipo_registro varchar(250),
+ projeto varchar(250),
+ long_utm varchar(250),
+ lat_utm varchar(250),
+ categoria_ameaca_iucn varchar(250),
+ categoria_ameaca_br varchar(250),
+ categoria_ameaca_pa varchar(250),
+ categoria_endemismo varchar(250),
+ categoria_endemismo_canga varchar(250),
+ classificacao_endemismo varchar(250),
+ importancia varchar(250));
+----------------------
+COPY fauna.mg_mamiferos (id,classe,ordem,familia,data,especie_estudo,nome_cientifico,tipo_registro,projeto,long_utm,lat_utm,categoria_ameaca_iucn,
+categoria_ameaca_br,categoria_ameaca_pa,categoria_endemismo,
+categoria_endemismo_canga,classificacao_endemismo,importancia) FROM '/home/felipe/Felipe/CARAJAS/Mestrado/Fauna/Tabelas/mg_mamiferos_14_12_2014.csv' WITH CSV HEADER;
+--Inserindo coluna de geometria
+ALTER TABLE fauna.mg_mamiferos add geom_sad geometry(POINT, 29192);
+--Adocionando nova coluna com SRC diferente SIRGAS2000
+ALTER TABLE fauna.mg_mamiferos add geom_sir geometry(POINT);
+--adicionando as coordenadas à coluna de geometria SAD
+UPDATE fauna.mg_mamiferos set geom_sad=ST_PointFromText('POINT('||long_utm|| ' ' || lat_utm || ')', 29192);
+--adicionando as coordenadas à coluna de geometria SIRgas2000
+UPDATE fauna.mg_mamiferos set geom_sir=ST_PointFromText('POINT('||long_utm|| ' ' || lat_utm || ')', 31982);
+
+--Tabela aves
+--drop table fauna.aves;
+--truncate table fauna.aves;
+CREATE TABLE fauna.aves(
+id_reg serial not null primary key,
+ id integer,
+ classe varchar(250),
+ ordem varchar(250),
+ familia varchar(250),
+ data varchar(250),
+ especie_estudo varchar(250),
+ nome_cientifico varchar(250),
+ tipo_registro varchar(250),
+ projeto varchar(250),
+ long_utm varchar(250),
+ lat_utm varchar(250),
+ categoria_ameaca_iucn varchar(250),
+ categoria_ameaca_br varchar(250),
+ categoria_ameaca_pa varchar(250),
+ categoria_endemismo varchar(250),
+ categoria_endemismo_canga varchar(250),
+ classificacao_endemismo varchar(250),
+ importancia varchar(250));
+----------------------
+COPY fauna.aves (id,classe,ordem,familia,data,especie_estudo,nome_cientifico,tipo_registro,projeto,long_utm,lat_utm,categoria_ameaca_iucn,
+categoria_ameaca_br,categoria_ameaca_pa,categoria_endemismo,
+categoria_endemismo_canga,classificacao_endemismo,importancia) FROM '/home/felipe/Felipe/CARAJAS/Mestrado/Fauna/Tabelas/aves_14_12_2014.csv' WITH CSV HEADER;
+--Inserindo coluna de geometria
+ALTER TABLE fauna.aves add geom_sad geometry(POINT, 29192);
+--Adocionando nova coluna com SRC diferente SIRGAS2000
+ALTER TABLE fauna.aves add geom_sir geometry(POINT);
+--adicionando as coordenadas à coluna de geometria SAD
+UPDATE fauna.aves set geom_sad=ST_PointFromText('POINT('||long_utm|| ' ' || lat_utm || ')', 29192);
+--adicionando as coordenadas à coluna de geometria SIRgas2000
+UPDATE fauna.aves set geom_sir=ST_PointFromText('POINT('||long_utm|| ' ' || lat_utm || ')', 31982);
+
+-----------------------------------------
+--Riqueza de especies
+select count(distinct nome_cientifico) from flora.flora_endemica;
+select count(distinct nome) from flora.flora_extrativismo;
+select count(distinct nome_cientifico) from fauna.anfibios;
+select count(distinct nome_cientifico) from fauna.repteis;
+select count(distinct nome_cientifico) from fauna.peq_mamiferos;
+select count(distinct nome_cientifico) from fauna.morcegos;
+select count(distinct nome_cientifico) from fauna.mg_mamiferos;
+select count(distinct nome_cientifico) from fauna.aves;
