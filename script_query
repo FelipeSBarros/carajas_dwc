@@ -32,3 +32,54 @@ UPDATE flora.flora_endemica set geom_teste=ST_PointFromText('POINT('||long_utm||
 --Qual a distancia media quando usamos datum diferentes?
 select avg(st_distance(geom_teste,st_transform(geom_sad,31982))) from flora.flora_endemica;
 --media de 60.6 metros entre os registros inseridos com datum correto ao registro com datum errado WGS85
+
+
+
+--em quantos grids cada espécies ocorre? e qual o percentual dessa distribuição para a paisagem toda?
+with contgrid as 
+	(select a.nome_cientifico, count(distinct g.geom) as grid from fauna.anfibios a join
+	grid.grid_sir g on st_intersects(a.geom_sir,g.geom)
+	group by a.nome_cientifico),
+total as (select count(distinct g.geom) as total_grids from grid.grid_sir g)
+select contgrid.nome_cientifico, contgrid.grid, round((contgrid.grid)::numeric/(total.total_grids)::numeric*100,2) from contgrid, total
+	group by contgrid.nome_cientifico, contgrid.grid, total.total_grids order by contgrid.grid ASC;
+
+--em quantos grids cada grupo de biodiversidade ocorre? e qual o percentual dessa distribuição para a paisagem toda?
+with contgrid as 
+	(select 'anfibios' as grupo, count(distinct g.geom) as grid from fauna.anfibios anfibios join
+	grid.grid_sir g on st_intersects(anfibios.geom_sir,g.geom) union all
+	select 'aves' as grupo, count(distinct g.geom) as grid from fauna.aves aves join
+	grid.grid_sir g on st_intersects(aves.geom_sir,g.geom) 
+	group by grupo),
+total as (select count(distinct g.geom) as total_grids from grid.grid_sir g)
+select contgrid.grupo, contgrid.grid, round((contgrid.grid)::numeric/(total.total_grids)::numeric*100,2) from contgrid, total
+	group by contgrid.grupo,contgrid.grid, total.total_grids order by contgrid.grid ASC;
+
+
+
+
+
+CAVERNAS
+Cavernas
+espeleometria
+
+
+FAUNA
+anfibios
+aves
+fauna_cav
+mg_mamiferos
+morcegos
+peq_mamiferos
+repteis
+
+FLORA
+Flora_endemica
+Flora_extrativismo
+
+PUBLIC
+geoambientes (por feicao)
+lagoas
+nascentes
+
+
