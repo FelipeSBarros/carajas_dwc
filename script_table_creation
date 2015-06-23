@@ -128,17 +128,21 @@ COPY flora.tnrs_flora_endemica (Name_submitted,Name_matched,Author_matched,Overa
 
 --Inserindo uma coluna para ter nome TNRS
 ALTER TABLE flora.flora_endemica add tnrs_id integer;
---Inserindo coluna de geometria
+--Inserindo coluna de geometria SAD UTM
 ALTER TABLE flora.flora_endemica add geom_sad geometry(POINT, 29192);
---Adocionando nova coluna com SRC diferente SIRGAS2000
+--Adocionando nova coluna com SRC diferente SIRGAS2000 UTM
 ALTER TABLE flora.flora_endemica add geom_sir geometry(POINT, 31982);
---adicionando as coordenadas à coluna de geometria SAD
+--adicionando as coordenadas à coluna de geometria SAD UTM
 UPDATE flora.flora_endemica set geom_sad=ST_PointFromText('POINT('||long_utm|| ' ' || lat_utm || ')', 29192);
---adicionando as coordenadas à coluna de geometria SIRgas2000
+--adicionando as coordenadas à coluna de geometria SIRgas2000 UTM
 UPDATE flora.flora_endemica set geom_sir=ST_transform(geom_sad, 31982);
 --Adicionando a chave extrangeira do resultado tnrs a tabela flora_endemica
 UPDATE flora.flora_endemica a set tnrs_id=b.id_reg from flora.tnrs_flora_endemica b where a.nome_cientifico=b.name_submitted ;
 
+--teste: Adicionando coluna geometria lat/long sad
+ALTER TABLE flora.flora_endemica add geom_wgs84 geometry(POINT, 4326);
+--Adicionando os dados wgs84 a tabela
+UPDATE flora.flora_endemica set geom_wgs84=ST_PointFromText('POINT('||long|| ' ' || lat || ')', 4326);
 
 --------------------------
 --FAUNA
