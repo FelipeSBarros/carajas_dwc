@@ -45,41 +45,68 @@ select contgrid.nome_cientifico, contgrid.grid, round((contgrid.grid)::numeric/(
 	group by contgrid.nome_cientifico, contgrid.grid, total.total_grids order by contgrid.grid ASC;
 
 --em quantos grids cada grupo de biodiversidade ocorre? e qual o percentual dessa distribuição para a paisagem toda?
+----------------
+--FAUNA
+----------------
 with contgrid as 
 	(select 'anfibios' as grupo, count(distinct g.geom) as grid from fauna.anfibios anfibios join
 	grid.grid_sir g on st_intersects(anfibios.geom_sir,g.geom) union all
 	select 'aves' as grupo, count(distinct g.geom) as grid from fauna.aves aves join
-	grid.grid_sir g on st_intersects(aves.geom_sir,g.geom) 
+	grid.grid_sir g on st_intersects(aves.geom_sir,g.geom) union all
+	select 'fauna cavernicola' as grupo, count(distinct g.geom) as grid from fauna.fauna_cav_sir fcav join
+	grid.grid_sir g on st_intersects(fcav.geom,g.geom) union all
+	select 'grandes mamiferos' as grupo, count(distinct g.geom) as grid from fauna.mg_mamiferos mg_mamiferos join
+	grid.grid_sir g on st_intersects(mg_mamiferos.geom_sir,g.geom) union all
+	select 'morcegos' as grupo, count(distinct g.geom) as grid from fauna.morcegos morcegos join
+	grid.grid_sir g on st_intersects(morcegos.geom_sir,g.geom) union all
+	select 'pequenos mamiferos' as grupo, count(distinct g.geom) as grid from fauna.peq_mamiferos peq_mamiferos join
+	grid.grid_sir g on st_intersects(peq_mamiferos.geom_sir,g.geom) union all
+	select 'repteis' as grupo, count(distinct g.geom) as grid from fauna.repteis repteis join
+	grid.grid_sir g on st_intersects(repteis.geom_sir,g.geom) 
 	group by grupo),
 total as (select count(distinct g.geom) as total_grids from grid.grid_sir g)
-select contgrid.grupo, contgrid.grid, round((contgrid.grid)::numeric/(total.total_grids)::numeric*100,2) from contgrid, total
-	group by contgrid.grupo,contgrid.grid, total.total_grids order by contgrid.grid ASC;
+select contgrid.grupo, contgrid.grid as n_paisagens, round((contgrid.grid)::numeric/(total.total_grids)::numeric*100,2) as perc_paisagens from contgrid, total
+	group by contgrid.grupo,contgrid.grid, total.total_grids order by contgrid.grupo ASC;
+------------
+--CAVERNAS
+------------
+with contgrid as 
+	(select 'cavernas' as grupo, count(distinct g.geom) as grid from cavernas.cavernas cavernas join
+	grid.grid_sir g on st_intersects(cavernas.geom,g.geom) union all
+	select 'espeleometria' as grupo, count(distinct g.geom) as grid from cavernas.espeleometria espeleo join
+	grid.grid_sir g on st_intersects(espeleo.geom,g.geom)
+	group by grupo),
+total as (select count(distinct g.geom) as total_grids from grid.grid_sir g)
+select contgrid.grupo, contgrid.grid as n_paisagens, round((contgrid.grid)::numeric/(total.total_grids)::numeric*100,2) as perc_paisagens from contgrid, total
+	group by contgrid.grupo,contgrid.grid, total.total_grids order by contgrid.grupo ASC;
 
+----------------
+--FLORA
+----------------
+with contgrid as 
+	(select 'flora endemica' as grupo, count(distinct g.geom) as grid from flora.flora_endemica endemica join
+	grid.grid_sir g on st_intersects(endemica.geom_sir,g.geom) union all
+	select 'flora extrativismo' as grupo, count(distinct g.geom) as grid from flora.flora_extrativismo extrativismo join
+	grid.grid_sir g on st_intersects(extrativismo.geom,g.geom) union all
+	select 'fabaceas' as grupo, count(distinct g.geom) as grid from flora.fabaceas fab join
+	grid.grid_sir g on st_intersects(fab.geom,g.geom)
+	group by grupo),
+total as (select count(distinct g.geom) as total_grids from grid.grid_sir g)
+select contgrid.grupo, contgrid.grid as n_paisagens, round((contgrid.grid)::numeric/(total.total_grids)::numeric*100,2) as perc_paisagens from contgrid, total
+	group by contgrid.grupo,contgrid.grid, total.total_grids order by contgrid.grupo ASC;
 
-
-
-
-CAVERNAS
-Cavernas
-espeleometria
-
-
-FAUNA
-anfibios
-aves
-fauna_cav
-mg_mamiferos
-morcegos
-peq_mamiferos
-repteis
-
-FLORA
-Flora_endemica
-Flora_extrativismo
-
-PUBLIC
-geoambientes (por feicao)
-lagoas
-nascentes
-
+----------------
+--OUTROS
+----------------
+with contgrid as 
+	(select 'geoambientes' as grupo, count(distinct g.geom) as grid from public.geoambientes geoambientes join
+	grid.grid_sir g on st_intersects(geoambientes.geom,g.geom) union all
+	select 'lagoas' as grupo, count(distinct g.geom) as grid from public.lagoas lagoas join
+	grid.grid_sir g on st_intersects(lagoas.geom,g.geom) union all
+	select 'nascentes' as grupo, count(distinct g.geom) as grid from public.nascentes nascentes join
+	grid.grid_sir g on st_intersects(nascentes.geom,g.geom)
+	group by grupo),
+total as (select count(distinct g.geom) as total_grids from grid.grid_sir g)
+select contgrid.grupo, contgrid.grid as n_paisagens, round((contgrid.grid)::numeric/(total.total_grids)::numeric*100,2) as perc_paisagens from contgrid, total
+	group by contgrid.grupo,contgrid.grid, total.total_grids order by contgrid.grupo ASC;
 
